@@ -162,9 +162,24 @@ function StatusList({
   // 위쪽 상태 수는 항상 13곳 기준이다. 청사를 고르면 표에는 그 청사만 펼쳐서 보여 준다.
   const counts = countStatuses(rows);
   const shown = officeId === null ? rows : rows.filter((r) => r.officeId === officeId);
+  // 알림: 제출 기한이 지났는데 아직 내지 않은 사업장 (화면 안 알림, 발송 아님). 어떤 보기·청사 선택에서도 13곳 기준으로 알린다
+  const overdueRows = rows.filter((r) => r.status === "overdue");
 
   return (
     <>
+      {overdueRows.length > 0 && (
+        <div
+          role="alert"
+          className="rounded-md border border-red-400 bg-red-50 px-4 py-4 text-sm text-red-900 dark:border-red-700 dark:bg-red-950 dark:text-red-200"
+        >
+          <p className="text-base font-bold">⏰ 제출지연 {overdueRows.length}곳</p>
+          <p className="mt-1">
+            제출 기한({DEADLINE_LABEL})이 지났는데 아직 제출하지 않았습니다:{" "}
+            <strong>{overdueRows.map((r) => r.officeName).join(", ")}</strong>
+          </p>
+        </div>
+      )}
+
       <p role="status" className="text-sm font-medium">
         {/* 마감 뒤에 낸 보고도 제출 완료에 함께 센다 */}
         {STATUS_LABEL.submitted} {counts.submitted + counts.late} · {STATUS_LABEL.missing} {counts.missing} ·{" "}

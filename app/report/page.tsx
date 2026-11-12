@@ -98,7 +98,21 @@ async function ReportScreen() {
         <LogoutButton />
       </header>
 
-      {pastDeadline && (
+      {/* 알림: 제출 기한이 지났는데 아직 이번 주 보고를 내지 않았으면 눈에 띄게 알려 준다 (화면 안 알림, 발송 아님) */}
+      {status?.status === "overdue" && (
+        <div
+          role="alert"
+          className="rounded-md border border-red-400 bg-red-50 px-4 py-4 text-sm text-red-900 dark:border-red-700 dark:bg-red-950 dark:text-red-200"
+        >
+          <p className="text-base font-bold">⏰ 제출 기한이 지났습니다</p>
+          <p className="mt-1">
+            이번 주 보고 제출 기한({DEADLINE_LABEL})이 지났는데 아직 제출하지 않았습니다. 아래 내용을 작성해 지금
+            제출해 주세요.
+          </p>
+        </div>
+      )}
+
+      {pastDeadline && status?.status !== "overdue" && (
         <p
           role="note"
           className="rounded-md border border-orange-400 bg-orange-50 px-4 py-3 text-sm text-orange-900 dark:border-orange-700 dark:bg-orange-950 dark:text-orange-200"

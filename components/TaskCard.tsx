@@ -136,8 +136,8 @@ export default function TaskCard({
             className={inputBase + (contentError ? inputError : inputOk)}
             placeholder={
               sectionKey === "next"
-                ? "작업예정일과 작업 내용을 함께 적어 주세요.\n예) 작업예정일: 00년 00월 00일\n로프 교체 작업 예정이며, 점검 후 시운전 예정"
-                : "작업일과 진행 상황·작업 내용을 함께 적어 주세요.\n예) 작업일: 00년 00월 00일\n로프 교체 작업 중이며, 점검 후 시운전 예정"
+                ? "아래 순서로 적어 주세요.\n1. 일시(작업예정일): 00년 00월 00일\n2. 장소: 예) 본관 3호기\n3. 내용: 예) 로프 교체 작업 예정"
+                : "아래 순서로 적어 주세요.\n1. 일시(작업일): 00년 00월 00일\n2. 장소: 예) 본관 3호기\n3. 내용: 예) 로프 교체 작업 중, 점검 후 시운전 예정"
             }
           />
           <div className="mt-1 flex justify-between gap-2 text-xs">
