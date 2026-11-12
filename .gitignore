@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# bkit plugin logs
+/.bkit/
+
+# Supabase CLI 임시 파일 (프로젝트 ref·조직 ID 포함)
+/supabase/.temp/
+
+# 삭제 대기 파일 (사용자가 직접 확인 후 삭제)
+/trash-can/

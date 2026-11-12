@@ -1,14 +1,21 @@
 @import "tailwindcss";
 
+/* 디자인: 한국자산관리공사 누리집(https://www.kamco.or.kr)의 분위기를 참고했다 —
+   흰 바탕에 진한 남색(#003872, #08205e) 포인트, 가는 회색 구분선, Noto Sans KR 글꼴.
+   (로고·이미지·이름은 쓰지 않는다. 색과 배치 느낌만 참고) */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #222222;
+  --brand: #003872;
+  --brand-dark: #08205e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --font-sans: var(--font-noto-sans-kr), "Noto Sans KR", Roboto, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -16,11 +23,14 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    /* 어두운 화면에서는 남색이 묻히므로 조금 밝게 */
+    --brand: #3b6fb6;
+    --brand-dark: #2f5c9a;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }

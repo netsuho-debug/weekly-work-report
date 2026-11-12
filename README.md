@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 사업장별 주간 공사·작업 현황
 
-## Getting Started
+중부개발처 자산관리팀이 담당하는 **사업장 13곳**의 주간 보고(이번 주 작업 내용 + **다음 주 예정 작업**)를 한곳에서 받고 취합하는 웹앱입니다.
 
-First, run the development server:
+법정 정기점검을 확인하는 앱이 아니라, **비정기적으로 시행되는 공사·작업을 미리 파악**하는 것이 목적입니다. 그동안 전화·이메일로 흩어져 들어오던 내용을 한곳으로 모아, 서무직원의 주간 취합 시간(약 2일)을 30분 이내로 줄이는 것을 목표로 합니다.
+
+## 주요 기능
+
+**사업장 담당자 (관리소장)**
+- 사업장 코드로 입장 → 내 사업장의 주간 보고 작성
+- "이번 주 작업 내용"과 "다음 주 예정 작업" 두 구역, 구역마다 작업 1~20건 (작업이 없으면 "작업 없음" 체크)
+- 작업 1건 = 작업명(50자) · 내용(500자, 작업일 함께 기재) · 금액(원, 쉼표 표시, 다음 주 금액은 비우면 "미정")
+- 작성 중 내용 브라우저 임시 저장, 제출하면 삭제 / 한 사업장·한 주에 보고 1건(다시 제출하면 덮어쓰기)
+- 제출 마감 매주 **목요일 11:00** (마감 뒤에도 제출 가능, "제출 완료"로 표시)
+
+**부서 서무직원·담당자**
+- 부서용 코드로 입장 → **주간 업무 보고 현황** 화면
+  - [다음 주 예정 작업] 보기(기본): 13곳의 다음 주 예정 작업을 한 번에 확인
+  - [이번 주 작업 내용] 보기: 이번 주 작업별 금액과 합계
+  - 제출 상태: 제출 완료 / 미제출(마감 전) / 제출지연(마감 뒤에도 안 냄), 항상 13곳 모두 표시
+- 주차·사업장 선택으로 지난 보고 조회
+- 엑셀 내려받기 (작업 1건당 1행, 6개 열)
+- 접속 코드 14개(사업장 13 + 부서용 1) 변경 화면
+
+## 기술 스택
+
+- Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4
+- Supabase (PostgreSQL) — 서버 코드에서만 접근
+- 접속 코드는 해시로만 저장하고, 로그인 상태는 서명된 쿠키로 유지합니다 (개인 회원가입·비밀번호 로그인 없음)
+- Vercel 배포
+
+## 로컬에서 실행하기
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+프로젝트 루트에 `.env` 파일이 필요합니다 (저장소에는 올라가지 않습니다).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| 변수 | 설명 |
+|---|---|
+| `SUPABASE_URL` | Supabase 프로젝트 주소 |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase 서비스 키 (서버 전용) |
+| `SESSION_SECRET` | 로그인 쿠키 서명용 비밀 값 |
+| `CODE_PEPPER` | 접속 코드 해시용 비밀 값 |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+데이터베이스 표와 함수는 `supabase/schema.sql`로 만들고, 접속 코드 14개는 `scripts/seed-codes.mjs`로 처음 발급합니다.
 
-## Learn More
+## 문서
 
-To learn more about Next.js, take a look at the following resources:
+- [PRD.md](PRD.md) — 서비스 기획서 (무엇을, 왜 만드는가)
+- [PLAN.md](PLAN.md) — 목표·성공 기준과 작업 순서
+- [DESIGN.md](DESIGN.md) — 화면 구성, 데이터 흐름, 폴더 구조
+- [CLAUDE.md](CLAUDE.md) — 이 프로젝트에서 AI가 지키는 작업 규칙
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 만들지 않은 것
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+개인 회원가입·로그인, 결재·승인, 알림(문자·카톡·이메일), 사진·파일 첨부, 사업장 추가·삭제 화면, 통계 그래프, 외부 시스템 연동, 설치형 앱.
