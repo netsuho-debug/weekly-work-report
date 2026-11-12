@@ -7,12 +7,12 @@ import { OFFICES } from "./offices";
 /** 코드가 필요한 14곳: 부서용 + 청사 1~13 */
 export type CodeSlot = "dept" | number;
 
-/** 화면·응답에 보이는 이름 ("부서용", "1청사" ...) */
+/** 화면·응답에 보이는 이름 ("부서용", "광주남구청" ...) */
 export function slotLabel(slot: CodeSlot): string {
-  return slot === "dept" ? "부서용" : `${slot}청사`;
+  return slot === "dept" ? "부서용" : (OFFICES.find((o) => o.id === slot)?.name ?? `${slot}번`);
 }
 
-/** 화면에 줄 세우는 순서: 부서용 먼저, 그다음 1청사~13청사 */
+/** 화면에 줄 세우는 순서: 부서용 먼저, 그다음 사업장 1~13번 순서 */
 export const ALL_SLOTS: readonly CodeSlot[] = ["dept", ...OFFICES.map((o) => o.id)];
 
 const slotSchema = z.union([z.literal("dept"), z.number().int().min(1).max(13)]);

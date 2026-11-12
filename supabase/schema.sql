@@ -13,9 +13,13 @@ create table if not exists public.offices (
   name text not null
 );
 
-insert into public.offices (id, name)
-select n, n || '청사' from generate_series(1, 13) as n
-on conflict (id) do nothing;
+-- 이름은 가나다순 (lib/offices.ts 의 OFFICE_NAMES 와 같게 유지한다)
+insert into public.offices (id, name) values
+  (1, '광주남구청'), (2, '광주동구복합청사'), (3, '광주통합청사'), (4, '다목적교육관'),
+  (5, '대전센터'), (6, '대전통합청사'), (7, '무안다산마을'), (8, '세종국책단지'),
+  (9, '세종다산마을'), (10, '원주통합청사'), (11, '익산통합청사'), (12, '캐피탈타워'),
+  (13, '태안정책연수원')
+on conflict (id) do update set name = excluded.name;
 
 -- ── 주간 보고 (한 청사·한 주에 1건) ────────────────────────────
 create table if not exists public.reports (

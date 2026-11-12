@@ -15,7 +15,7 @@ import { AMOUNT_UNDECIDED } from "./amount";
 import { STATUS_LABEL, type OfficeStatusRow, type TaskView } from "./status";
 
 /** 엑셀 첫 줄(열 이름). 순서가 곧 열 순서다 */
-export const EXPORT_HEADERS = ["청사명", "구분", "작업명", "내용", "금액", "상태"] as const;
+export const EXPORT_HEADERS = ["사업장명", "구분", "작업명", "내용", "금액", "상태"] as const;
 
 /** 구역 이름 */
 const SECTION_LABEL = { this: "이번 주", next: "다음 주" } as const;

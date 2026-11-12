@@ -25,10 +25,14 @@ if (!url || !key || !process.env.CODE_PEPPER) {
 }
 const db = createClient(url, key, { auth: { persistSession: false } });
 
-// 코드가 필요한 14곳: 부서용 1 + 청사 1~13
+// 코드가 필요한 14곳: 부서용 1 + 사업장 1~13 (이름·순서는 lib/offices.ts 의 OFFICE_NAMES 와 같게 유지한다)
+const OFFICE_NAMES = [
+  "광주남구청", "광주동구복합청사", "광주통합청사", "다목적교육관", "대전센터", "대전통합청사", "무안다산마을",
+  "세종국책단지", "세종다산마을", "원주통합청사", "익산통합청사", "캐피탈타워", "태안정책연수원",
+];
 const slots = [
   { label: "부서용", role: "dept", office_id: null },
-  ...Array.from({ length: 13 }, (_, i) => ({ label: `${i + 1}청사`, role: "office", office_id: i + 1 })),
+  ...OFFICE_NAMES.map((name, i) => ({ label: `${i + 1}번 ${name}`, role: "office", office_id: i + 1 })),
 ];
 
 const { data: existing, error: readError } = await db.from("access_codes").select("id, role, office_id, version");

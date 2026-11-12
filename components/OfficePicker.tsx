@@ -20,7 +20,7 @@ export default function OfficePicker({ week, officeId, view = "next" }: OfficePi
       {week !== null && <input type="hidden" name="week" value={week} />}
       {view === "this" && <input type="hidden" name="view" value="this" />}
       <label htmlFor="office-select" className="text-sm font-medium">
-        청사
+        사업장
       </label>
       <select
         // key: 주소가 바뀌어 화면만 다시 그려질 때도 목록이 지금 고른 청사를 가리키게 새로 만든다

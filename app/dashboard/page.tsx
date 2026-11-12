@@ -193,7 +193,7 @@ function StatusList({
           aria-hidden="true"
           className={`${ROW_GRID} hidden bg-zinc-50 px-4 py-2 text-xs font-semibold text-zinc-600 sm:grid dark:bg-zinc-900 dark:text-zinc-400`}
         >
-          <span>청사</span>
+          <span>사업장</span>
           <span>상태</span>
           <span className="text-right">{view === "next" ? "다음 주 예정 작업" : "이번 주 금액 합계"}</span>
           <span>마지막 제출</span>
