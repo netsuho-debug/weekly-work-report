@@ -19,14 +19,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    /* 어두운 화면에서는 남색이 묻히므로 조금 밝게 */
-    --brand: #3b6fb6;
-    --brand-dark: #2f5c9a;
-  }
+/* 2026-11-17: 휴대폰이 다크 모드여도 항상 밝은 화면으로 보이게 고정한다 (흰 바탕 디자인·로고 기준).
+   - 화면 곳곳의 dark: 색상은 html 에 .dark 클래스가 있을 때만 켜지도록 바꿨고, 그 클래스는 어디서도 붙이지 않는다.
+   - color-scheme: light 로 입력칸·스크롤바 같은 브라우저 기본 부품도 밝은 모양으로 그린다. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
 }
 
 body {
