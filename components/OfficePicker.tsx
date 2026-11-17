@@ -33,7 +33,7 @@ export default function OfficePicker({ week, officeId, view = "this" }: OfficePi
         defaultValue={officeId === null ? "" : String(officeId)}
         className={selectClass}
       >
-        <option value="">전체 사업장</option>
+        <option value="">전체 목록</option>
         {OFFICES.map((o) => (
           <option key={o.id} value={o.id}>
             {o.name}
