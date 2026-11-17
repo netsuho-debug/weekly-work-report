@@ -5,6 +5,7 @@
 
 import TaskCard from "./TaskCard";
 import { MAX_TASKS_PER_SECTION, type TaskField, type TaskInput } from "@/lib/schema";
+import { PANEL } from "./PageShell";
 
 /** 작업 행 하나의 화면 상태 */
 export type TaskRow = {
@@ -49,15 +50,16 @@ export default function ReportSection({
   const canRemove = rows.length > 1;
 
   return (
-    <section aria-labelledby={`${sectionKey}-heading`} className="space-y-3">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 id={`${sectionKey}-heading`} className="text-lg font-bold">
+    // 디자인 4차: 구역마다 흰 판 하나. 제목 옆에는 날짜만 짧게 (예: 11.16(월) ~ 11.22(일))
+    <section aria-labelledby={`${sectionKey}-heading`} className={`${PANEL} space-y-3 px-4 py-4 sm:px-6 sm:py-5`}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 id={`${sectionKey}-heading`} className="text-base font-bold sm:text-lg">
             {title}
           </h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">{description}</p>
+          <p className="text-xs text-zinc-500 sm:text-sm">{description}</p>
         </div>
-        <label className="flex shrink-0 cursor-pointer items-center gap-2 rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium dark:border-zinc-700">
+        <label className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium">
           <input
             id={`${sectionKey}-none`}
             type="checkbox"
@@ -105,10 +107,13 @@ export default function ReportSection({
         >
           + 작업 추가
         </button>
-        <p role="status" className="text-xs text-zinc-500">
-          {rows.length} / {MAX_TASKS_PER_SECTION}건
-          {!canAdd && " (최대)"}
-        </p>
+        {/* 건수 한도는 가까워졌을 때만 알려 준다 */}
+        {rows.length >= MAX_TASKS_PER_SECTION - 4 && (
+          <p role="status" className="text-xs text-zinc-500">
+            {rows.length} / {MAX_TASKS_PER_SECTION}건
+            {!canAdd && " (최대)"}
+          </p>
+        )}
       </div>
       )}
     </section>

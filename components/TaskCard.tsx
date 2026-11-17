@@ -78,7 +78,7 @@ export default function TaskCard({
         : null;
 
   return (
-    <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+    <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 sm:p-4">
       <div className="mb-3 flex items-center justify-between">
         <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">작업 {index}</p>
         <button
@@ -114,9 +114,12 @@ export default function TaskCard({
             <p id={`${id}-title-error`} className="text-red-600">
               {titleError}
             </p>
-            <p className={titleLen > TITLE_MAX ? "text-red-600" : "text-zinc-500"}>
-              {titleLen}/{TITLE_MAX}
-            </p>
+            {/* 글자 수는 한도에 가까워졌을 때(80% 이상)만 보여 준다 (디자인 4차: 칸마다 숫자가 있어 복잡했다) */}
+            {titleLen >= TITLE_MAX * 0.8 && (
+              <p className={titleLen > TITLE_MAX ? "text-red-600" : "text-zinc-500"}>
+                {titleLen}/{TITLE_MAX}
+              </p>
+            )}
           </div>
         </div>
 
@@ -144,9 +147,11 @@ export default function TaskCard({
             <p id={`${id}-content-error`} className="text-red-600">
               {contentError}
             </p>
-            <p className={contentLen > CONTENT_MAX ? "text-red-600" : "text-zinc-500"}>
-              {contentLen}/{CONTENT_MAX}
-            </p>
+            {contentLen >= CONTENT_MAX * 0.8 && (
+              <p className={contentLen > CONTENT_MAX ? "text-red-600" : "text-zinc-500"}>
+                {contentLen}/{CONTENT_MAX}
+              </p>
+            )}
           </div>
         </div>
 

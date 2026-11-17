@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { codeRuleMessage, GENERATED_CODE_LENGTH } from "@/lib/code-rules";
 import { ALL_SLOTS, slotLabel, type ChangeBody, type ChangeResponse, type CodeSlot, type IssuedCode } from "@/lib/codes-api";
+import { PANEL } from "./PageShell";
 
 /** 줄마다 고르는 방법: 그대로 / 직접 입력 / 자동 생성 */
 type Mode = "keep" | "manual" | "auto";
@@ -157,38 +158,49 @@ export default function CodeChangeForm() {
         </label>
       </div>
 
-      <ul className="divide-y divide-zinc-200 overflow-hidden rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+      {/* 디자인 4차: 휴대폰에서 이름이 두 줄로 쪼개지고 선택지가 줄바꿈되던 것을 고쳤다.
+          줄마다 사업장 이름을 윗줄에 두고, 그 아래에 [그대로 | 새 코드 입력 | 자동 생성] 세 칸 버튼을 둔다.
+          (속은 그대로 라디오 버튼이라 키보드·화면 읽기 프로그램으로도 고를 수 있다) */}
+      <ul className={`${PANEL} divide-y divide-zinc-100 overflow-hidden`}>
         {ALL_SLOTS.map((slot) => {
           const key = slotKey(slot);
           const row = rows[key];
           const error = errors[key];
           const label = slotLabel(slot);
           return (
-            <li key={key} className={`space-y-2 px-4 py-3 ${slot === "dept" ? "bg-zinc-50 dark:bg-zinc-900" : ""}`}>
-              <fieldset className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <li key={key} className={`space-y-2 px-4 py-3 sm:px-6 ${slot === "dept" ? "bg-zinc-50" : ""}`}>
+              <fieldset className="space-y-2">
                 <legend className="sr-only">{label} 코드</legend>
-                <span className="w-16 shrink-0 font-semibold">{label}</span>
-                {(
-                  [
-                    ["keep", "그대로"],
-                    ["manual", "새 코드 입력"],
-                    ["auto", "자동 생성"],
-                  ] as const
-                ).map(([mode, text]) => (
-                  <label key={mode} className="flex items-center gap-1.5 text-sm">
-                    <input
-                      type="radio"
-                      name={`mode-${key}`}
-                      checked={row.mode === mode}
-                      onChange={() => updateRow(slot, { mode })}
-                    />
-                    {text}
-                  </label>
-                ))}
+                <p className="font-semibold text-zinc-900">{label}</p>
+                <div className="grid grid-cols-3 divide-x divide-zinc-300 overflow-hidden rounded-lg border border-zinc-300 text-sm">
+                  {(
+                    [
+                      ["keep", "그대로"],
+                      ["manual", "새 코드 입력"],
+                      ["auto", "자동 생성"],
+                    ] as const
+                  ).map(([mode, text]) => (
+                    <label
+                      key={mode}
+                      className={`flex cursor-pointer items-center justify-center px-1 py-2 text-center has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-inset has-[:focus-visible]:ring-brand ${
+                        row.mode === mode ? "bg-brand font-semibold text-white" : "bg-white text-zinc-700 hover:bg-zinc-50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        className="sr-only"
+                        name={`mode-${key}`}
+                        checked={row.mode === mode}
+                        onChange={() => updateRow(slot, { mode })}
+                      />
+                      {text}
+                    </label>
+                  ))}
+                </div>
               </fieldset>
 
               {row.mode === "manual" && (
-                <div className="pl-0 sm:pl-20">
+                <div>
                   <input
                     type={show ? "text" : "password"}
                     aria-label={`${label} 새 코드`}
@@ -207,15 +219,15 @@ export default function CodeChangeForm() {
                 </div>
               )}
               {row.mode === "auto" && (
-                <p className="text-xs text-zinc-500 sm:pl-20">저장할 때 서버가 {GENERATED_CODE_LENGTH}자 코드를 무작위로 만듭니다.</p>
+                <p className="text-xs text-zinc-500">저장할 때 서버가 숫자 {GENERATED_CODE_LENGTH}자리 코드를 무작위로 만듭니다.</p>
               )}
               {slot === "dept" && row.mode !== "keep" && (
-                <p className="text-xs text-amber-700 sm:pl-20 dark:text-amber-400">
+                <p className="text-xs text-orange-700">
                   부서용 코드를 바꾸면 서무직원·담당자 모두에게 새 코드를 알려야 합니다. (지금 쓰는 화면은 그대로 유지됩니다)
                 </p>
               )}
               {error && (
-                <p id={`code-error-${key}`} role="alert" className="text-sm font-medium text-red-600 sm:pl-20">
+                <p id={`code-error-${key}`} role="alert" className="text-sm font-medium text-red-600">
                   {error}
                 </p>
               )}
@@ -230,13 +242,16 @@ export default function CodeChangeForm() {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={busy}
-        className="w-full rounded-md bg-brand px-4 py-3 text-base font-semibold text-white hover:bg-brand-dark disabled:cursor-wait disabled:opacity-60"
-      >
-        {busy ? "저장하는 중..." : `저장 (${changingCount}개 변경)`}
-      </button>
+      {/* 저장 막대: 14줄을 내려가며 고르다가도 바로 저장할 수 있게 화면 아래에 붙어 있다 (디자인 4차) */}
+      <div className="sticky bottom-0 -mx-4 border-t border-zinc-200 bg-white/95 px-4 pb-4 pt-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:px-6">
+        <button
+          type="submit"
+          disabled={busy}
+          className="w-full rounded-lg bg-brand px-4 py-3 text-base font-semibold text-white hover:bg-brand-dark disabled:cursor-wait disabled:opacity-60"
+        >
+          {busy ? "저장하는 중..." : `저장 (${changingCount}개 변경)`}
+        </button>
+      </div>
     </form>
   );
 }

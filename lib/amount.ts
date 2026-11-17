@@ -15,6 +15,16 @@ export function formatWon(amount: number | null): string {
   return amount === null ? AMOUNT_UNDECIDED : `${formatNumberWithComma(amount)}원`;
 }
 
+/**
+ * 현황 화면 요약용 짧은 금액: 1만 원 이상은 만 원 단위로 반올림한다. 예: 75406500 → "7,541만원", 8000 → "8,000원"
+ * (임원이 한눈에 읽기 쉽도록 화면에서만 쓴다. 엑셀·보고 입력 화면은 지금처럼 원 단위 그대로)
+ */
+export function formatManwon(amount: number | null): string {
+  if (amount === null) return AMOUNT_UNDECIDED;
+  if (amount < 10000) return `${formatNumberWithComma(amount)}원`;
+  return `${formatNumberWithComma(Math.round(amount / 10000))}만원`;
+}
+
 /** 입력 글자가 올바른 금액이면 숫자로, 비었거나 잘못됐으면 null (미리보기용. 오류 판단은 schema.ts 가 한다) */
 export function amountTextToNumber(raw: string): number | null {
   const compact = raw.replace(/[,\s]/g, "");

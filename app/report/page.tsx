@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import LogoutButton from "@/components/LogoutButton";
+import { PageBand, PageShell } from "@/components/PageShell";
 import ReportForm, { type CarryOver } from "@/components/ReportForm";
 import StatusBadge from "@/components/StatusBadge";
 import { formatAmountInput } from "@/lib/amount";
@@ -23,7 +24,6 @@ import {
   addWeeks,
   DEADLINE_LABEL,
   DEADLINE_LABEL_LONG,
-  formatWeekRange,
   getNextWeekStart,
   getWeekEnd,
   getWeekStart,
@@ -49,6 +49,12 @@ function toSavedReport(row: OfficeStatusRow): SavedReport | null {
     this: { none: row.thisNone, tasks: row.thisTasks.map(toInput) },
     next: { none: row.nextNone, tasks: row.nextTasks.map(toInput) },
   };
+}
+
+/** 구역 제목 옆 짧은 날짜: "11.16(월) ~ 11.22(일)" (휴대폰에서도 한 줄) */
+function shortRange(weekStart: string): string {
+  const md = (ymd: string) => ymd.slice(5).replace("-", ".");
+  return `${md(weekStart)}(월) ~ ${md(getWeekEnd(weekStart))}(일)`;
 }
 
 const submittedAtFormat = new Intl.DateTimeFormat("ko-KR", {
@@ -99,55 +105,35 @@ async function ReportScreen() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-2xl space-y-6 px-4 py-8">
-      <header className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">{office.name} 주간 보고</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            제출 기한 매주 {DEADLINE_LABEL_LONG}
+    // 2026-11-18 디자인 4차: 다른 화면과 같은 틀(회색 바탕 + 둥근 남색 머리띠 + 흰 판).
+    // 마감·상태·개인정보 안내를 머리띠 안에 한 번씩만 모았다 (예전엔 위아래로 마감 안내가 두 번, 안내 상자가 두 개였다)
+    <PageShell>
+      <PageBand title={`${office.name} 주간 보고`} right={<LogoutButton onDark />}>
+        <p className="mt-1.5 text-sm text-sky-200">제출 마감 매주 {DEADLINE_LABEL_LONG}</p>
+        {/* 현재 상태 (DESIGN §1-2 "상단에 현재 상태를 표시") */}
+        {status && (
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+            <StatusBadge status={status.status} />
+            {status.submittedAt && (
+              <span className="text-xs text-sky-200">{submittedAtFormat.format(new Date(status.submittedAt))} 제출</span>
+            )}
           </p>
-          {/* 현재 상태 (DESIGN §1-2 "상단에 현재 상태(제출/지각 제출)를 표시") */}
-          {status && (
-            <p className="flex items-center gap-2 text-sm">
-              <span className="text-zinc-600 dark:text-zinc-400">현재 상태</span>
-              <StatusBadge status={status.status} />
-              {status.submittedAt && (
-                <span className="text-xs text-zinc-500">
-                  {submittedAtFormat.format(new Date(status.submittedAt))} 제출
-                </span>
-              )}
-            </p>
-          )}
-        </div>
-        <LogoutButton />
-      </header>
+        )}
+        <p role="note" className="mt-3 border-t border-white/15 pt-2.5 text-xs text-sky-100">
+          ⚠ 작업 내용에 개인 이름·연락처를 적지 마세요.
+        </p>
+      </PageBand>
 
       {/* 알림: 제출 기한이 지났는데 아직 이번 주 보고를 내지 않았으면 눈에 띄게 알려 준다 (화면 안 알림, 발송 아님) */}
       {status?.status === "overdue" && (
-        <div
-          role="alert"
-          className="rounded-md border border-red-400 bg-red-50 px-4 py-4 text-sm text-red-900 dark:border-red-700 dark:bg-red-950 dark:text-red-200"
-        >
-          <p className="text-base font-bold">⏰ 제출 기한이 지났습니다</p>
-          <p className="mt-1">
-            이번 주 보고 제출 기한({DEADLINE_LABEL})이 지났는데 아직 제출하지 않았습니다. 아래 내용을 작성해 지금
-            제출해 주세요.
-          </p>
+        <div role="alert" className="rounded-xl bg-orange-100 px-4 py-3 text-sm text-orange-900">
+          <p className="font-bold">⏰ 제출 기한({DEADLINE_LABEL})이 지났습니다</p>
+          <p className="mt-0.5">아래 내용을 작성해 지금 제출해 주세요.</p>
         </div>
       )}
 
-      <p
-        role="note"
-        className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
-      >
-        ⚠ 작업 내용에 개인 이름·연락처를 적지 마세요.
-      </p>
-
       {status === null && (
-        <p
-          role="alert"
-          className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
-        >
+        <p role="alert" className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
           이미 낸 보고를 불러오지 못했습니다. 이번 주에 이미 제출했다면 지금 제출할 때 기존 보고가 통째로
           바뀝니다. 화면을 새로고침한 뒤 다시 확인해 주세요.
         </p>
@@ -158,11 +144,10 @@ async function ReportScreen() {
         carryOver={carryOver}
         officeId={office.id}
         weekStart={thisWeek}
-        thisWeekDescription={`${formatWeekRange(thisWeek)} 에 진행한 작업입니다.`}
-        nextWeekDescription={`${formatWeekRange(nextWeek)} 에 할 작업입니다.`}
-        deadlineLabel={DEADLINE_LABEL}
+        thisWeekDescription={shortRange(thisWeek)}
+        nextWeekDescription={shortRange(nextWeek)}
       />
-    </main>
+    </PageShell>
   );
 }
 

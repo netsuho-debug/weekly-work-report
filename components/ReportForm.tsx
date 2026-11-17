@@ -138,8 +138,6 @@ type ReportFormProps = {
   weekStart: string;
   thisWeekDescription: string;
   nextWeekDescription: string;
-  /** 마감 안내 문구 (예: "화 15:00") */
-  deadlineLabel: string;
 };
 
 const subscribeNothing = () => () => {};
@@ -192,7 +190,6 @@ function ReportFormInner({
   weekStart,
   thisWeekDescription,
   nextWeekDescription,
-  deadlineLabel,
   initialDraft,
   clientReady,
 }: ReportFormInnerProps) {
@@ -485,7 +482,7 @@ function ReportFormInner({
   }
 
   return (
-    <form className="space-y-8" aria-label="주간 보고 입력" onSubmit={handleSubmit} noValidate>
+    <form className="space-y-3 sm:space-y-4" aria-label="주간 보고 입력" onSubmit={handleSubmit} noValidate>
       {pendingDraft !== null && (
         <div
           role="alert"
@@ -514,15 +511,12 @@ function ReportFormInner({
         </div>
       )}
 
-      {saved !== null && pendingDraft === null && restoredAt === null && submitStatus.kind !== "done" && (
-        <p role="status" className="rounded-md border border-zinc-300 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-900">
-          이번 주에 제출한 보고를 불러왔습니다. 고쳐서 다시 제출하면 기존 보고를 덮어씁니다.
-        </p>
-      )}
+      {/* (디자인 4차) "이번 주에 제출한 보고를 불러왔습니다" 상자는 머리띠의 "제출 완료" 표시와 겹쳐서 없앴다.
+          "다시 제출하면 덮어씁니다" 안내는 아래 제출 버튼 밑 한 줄로 옮겼다. */}
 
       {/* 지난주 보고의 "다음 주 예정 작업"을 이번 주 작업 내용으로 불러온 경우 (저장·제출은 아직 안 된 상태) */}
       {saved === null && carryOver !== null && restoredAt === null && submitStatus.kind !== "done" && (
-        <p role="status" className="rounded-md border border-blue-300 bg-blue-50 px-4 py-3 text-sm text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
+        <p role="status" className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-700">
           지난주({carryOver.fromLabel}) 보고에 적은 다음 주 예정 작업 {carryOver.tasks.length}건을 이번 주 작업 내용으로
           불러왔습니다. 아직 제출되지 않았으니 내용과 금액을 확인한 뒤 제출해 주세요.
           {carryOver.tasks.some((t) => t.amount === "") && " 금액이 '미정'이던 작업은 금액을 채워야 제출할 수 있습니다."}
@@ -566,11 +560,12 @@ function ReportFormInner({
         {...handlers("next")}
       />
 
-      <div className="space-y-2">
+      {/* 제출 막대: 휴대폰에서 긴 보고를 쓰다가도 바로 제출할 수 있게 화면 아래에 붙어 있다 (디자인 4차) */}
+      <div className="sticky bottom-0 -mx-4 space-y-1.5 border-t border-zinc-200 bg-white/95 px-4 pb-4 pt-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:px-6">
         <button
           type="submit"
           disabled={submitStatus.kind === "submitting"}
-          className="w-full rounded-md bg-brand px-4 py-3 text-base font-semibold text-white hover:bg-brand-dark disabled:cursor-wait disabled:opacity-60"
+          className="w-full rounded-lg bg-brand px-4 py-3 text-base font-semibold text-white hover:bg-brand-dark disabled:cursor-wait disabled:opacity-60"
         >
           {submitStatus.kind === "submitting" ? "제출하는 중..." : "제출하기"}
         </button>
@@ -613,11 +608,10 @@ function ReportFormInner({
             : savedAt !== null
               ? `임시 저장됨 ✓ (${timeFormat.format(savedAt)})`
               : "작성 내용은 이 브라우저에 자동으로 임시 저장됩니다."}
+          {/* 이미 낸 보고가 있으면, 다시 제출할 때 덮어쓴다는 것만 덧붙인다 */}
+          {saved !== null && submitStatus.kind !== "done" && " · 다시 제출하면 기존 보고를 덮어씁니다."}
         </p>
-
-        <p className="text-xs text-zinc-500">
-          제출 마감은 {deadlineLabel}입니다. 마감 뒤에 제출해도 &quot;제출 완료&quot;로 표시됩니다.
-        </p>
+        {/* (디자인 4차) "제출 마감은 화 15:00입니다…" 줄은 머리띠의 마감 안내와 겹쳐서 없앴다 */}
       </div>
     </form>
   );
