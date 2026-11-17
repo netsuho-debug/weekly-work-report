@@ -77,37 +77,40 @@ async function DashboardScreen({ searchParams }: { searchParams: SearchParams })
           <LogoutButton />
         </div>
         <p className="text-base font-semibold text-brand sm:text-lg dark:text-sky-300">{weekHeading(weekStart, currentWeekStart)}</p>
-        <p className="text-sm text-zinc-500">제출 마감 매주 {DEADLINE_LABEL}</p>
+        {/* 마감 안내 줄 오른쪽에 보조 버튼(엑셀·코드 변경)을 [나가기]와 같은 작은 크기로 둔다 */}
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-zinc-500">제출 마감 매주 {DEADLINE_LABEL}</p>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {/* 보고 주차를 엑셀로 받는다 (다음 주 화면이면 그 예정 작업이 들어 있는 이번 주 보고).
+                파일 내려받기라서 화면 이동용 링크(Link)가 아닌 일반 링크를 쓴다 */}
+            <a
+              href={`/api/export?week=${sourceWeek}`}
+              download
+              className="whitespace-nowrap rounded-md border border-green-700 px-3 py-1.5 text-xs font-semibold text-green-800 hover:bg-green-50 dark:border-green-600 dark:text-green-300 dark:hover:bg-green-950"
+            >
+              엑셀 내려받기
+            </a>
+            {/* 접속 코드 변경 화면 (작업 14, 부서용 코드만) */}
+            <Link
+              href="/admin/codes"
+              className="whitespace-nowrap rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            >
+              코드 변경
+            </Link>
+          </div>
+        </div>
       </header>
 
       {/* 조작 도구 모음 (2026-11-17 단순화): 칸마다 폭을 꽉 채워 휴대폰에서도 빈 곳이 없게 했다.
-          휴대폰: [이전 주|이번 주|다음 주] / [주차 목록|사업장 목록] / [엑셀|코드 변경] 세 줄
-          넓은 화면(lg): 한 줄로 이어 놓는다. 목록은 고르면 바로 이동해 [보기] 버튼이 필요 없다. */}
+          휴대폰: [이전 주|이번 주|다음 주] / [주차 목록|사업장 목록] 두 줄, 넓은 화면(lg): 한 줄.
+          목록은 고르면 바로 이동해 [보기] 버튼이 필요 없다. 엑셀·코드 변경은 위쪽 머리말로 옮겼다. */}
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-        <div className="lg:w-80 lg:shrink-0">
+        <div className="lg:w-96 lg:shrink-0">
           <WeekPicker weekStart={weekStart} currentWeekStart={currentWeekStart} officeId={officeId} />
         </div>
         <div className="grid min-w-0 grid-cols-2 gap-2 lg:flex-1">
           <WeekSelect weekStart={weekStart} currentWeekStart={currentWeekStart} officeId={officeId} />
           <OfficePicker week={weekStart === currentWeekStart ? null : weekStart} officeId={officeId} />
-        </div>
-        <div className="grid grid-cols-2 gap-2 lg:w-64 lg:shrink-0">
-          {/* 보고 주차를 엑셀로 받는다 (다음 주 화면이면 그 예정 작업이 들어 있는 이번 주 보고).
-              파일 내려받기라서 화면 이동용 링크(Link)가 아닌 일반 링크를 쓴다 */}
-          <a
-            href={`/api/export?week=${sourceWeek}`}
-            download
-            className="flex items-center justify-center rounded-lg bg-green-700 px-2 py-2.5 text-sm font-semibold text-white hover:bg-green-800"
-          >
-            엑셀 내려받기
-          </a>
-          {/* 접속 코드 변경 화면 (작업 14, 부서용 코드만) */}
-          <Link
-            href="/admin/codes"
-            className="flex items-center justify-center rounded-lg border border-zinc-300 px-2 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
-          >
-            코드 변경
-          </Link>
         </div>
       </div>
 
