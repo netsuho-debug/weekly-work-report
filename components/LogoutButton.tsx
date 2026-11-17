@@ -28,7 +28,7 @@ export default function LogoutButton() {
       type="button"
       onClick={handleClick}
       disabled={busy}
-      className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-100 disabled:opacity-60 dark:border-zinc-700 dark:hover:bg-zinc-800"
+      className="shrink-0 whitespace-nowrap rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-100 disabled:opacity-60 dark:border-zinc-700 dark:hover:bg-zinc-800"
     >
       나가기
     </button>

@@ -3,7 +3,7 @@
 //
 // PUT /api/codes { changes: [{ slot, mode: "auto" } | { slot, mode: "manual", code }] }
 //  - 부서용 코드로 입장한 사람만 쓸 수 있다.
-//  - 바꿀 칸만 보낸다. auto 는 서버가 난수 12자를 만들고, manual 은 직접 정한 코드(영문 대·소문자·숫자 섞어 12자 이상)다.
+//  - 바꿀 칸만 보낸다. auto 는 서버가 난수 숫자 6자리를 만들고, manual 은 직접 정한 코드(숫자 6자리)다.
 //  - 14칸 안에서 코드가 겹치면 거절한다(바뀌지 않는 칸의 현재 코드와 겹쳐도 마찬가지).
 //  - 여러 칸을 한 번에 바꾸되, 하나라도 실패하면 아무것도 바뀌지 않는다(DB 함수 change_codes).
 //  - 새 코드는 응답에 한 번만 담아 돌려주고, 어디에도 원문을 저장하지 않는다. (해시만 저장)
@@ -50,7 +50,7 @@ export async function PUT(request: Request) {
     return reply({ ok: false, code: "invalid", message: "같은 칸이 두 번 들어 있습니다." }, 400);
   }
 
-  // 1) 새 코드를 정하고 해시한다. 직접 정한 코드는 규칙(영문 대·소문자·숫자 섞어 12자 이상)을 검사한다.
+  // 1) 새 코드를 정하고 해시한다. 직접 정한 코드는 규칙(숫자 6자리)을 검사한다.
   const db = getDb();
   const { data: current, error: readError } = await db.from("access_codes").select("role, office_id, code_hash");
   if (readError || !current) {

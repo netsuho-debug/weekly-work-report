@@ -93,6 +93,27 @@ function fromSaved(saved: SavedReport): FormState {
   return { ...initialState, this: section(saved.this), next: section(saved.next), draftSuspended: true };
 }
 
+/** 지난주 보고의 "다음 주 예정 작업" → 이번 주 작업 내용의 처음 값 (다음 주 예정 작업 구역은 빈 화면) */
+export type CarryOver = {
+  /** 불러온 지난주 표시 (예: "11-16 ~ 11-22") */
+  fromLabel: string;
+  /** 불러온 작업들. 금액이 "미정"이던 작업은 "" */
+  tasks: { title: string; content: string; amount: string }[];
+};
+
+function fromCarry(carry: CarryOver): FormState {
+  return {
+    ...initialState,
+    this: {
+      rows: carry.tasks.map((values, i) => ({ id: i, values, touched: {} })),
+      nextRowId: carry.tasks.length,
+      none: false,
+    },
+    // 지난주 서버 내용 그대로이므로, 고치기 전까지는 임시 저장하지 않는다
+    draftSuspended: true,
+  };
+}
+
 const timeFormat = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
   hour: "numeric",
@@ -109,13 +130,15 @@ type SubmitStatus =
 type ReportFormProps = {
   /** 이번 주에 이미 낸 보고 (없으면 null) */
   saved: SavedReport | null;
+  /** 이번 주 보고가 없을 때, 지난주에 적은 다음 주 예정 작업 (없으면 null) */
+  carryOver: CarryOver | null;
   /** 내 청사 번호 (임시 저장 이름에 쓴다) */
   officeId: number;
   /** 이번 주 월요일 날짜 "YYYY-MM-DD" (임시 저장 이름에 쓴다) */
   weekStart: string;
   thisWeekDescription: string;
   nextWeekDescription: string;
-  /** 마감 안내 문구 (예: "목 11:00") */
+  /** 마감 안내 문구 (예: "화 15:00") */
   deadlineLabel: string;
 };
 
@@ -164,6 +187,7 @@ type ReportFormInnerProps = ReportFormProps & {
 
 function ReportFormInner({
   saved,
+  carryOver,
   officeId,
   weekStart,
   thisWeekDescription,
@@ -174,8 +198,13 @@ function ReportFormInner({
 }: ReportFormInnerProps) {
   const router = useRouter();
   const storageKey = draftKey(officeId, weekStart);
-  /** 처음 값: 이미 낸 보고가 있으면 그것, 없으면 빈 화면 */
-  const baseState = saved ? fromSaved(saved) : initialState;
+  /**
+   * 처음 값: 이미 낸 이번 주 보고 → 그것
+   *          없으면 지난주에 적은 다음 주 예정 작업 → 이번 주 작업 내용으로 불러오기 (제출 전까지 저장 안 됨)
+   *          그것도 없으면 빈 화면
+   * (작성 중이던 임시 저장본이 있으면 아래 draftUse 규칙대로 그것이 우선이다)
+   */
+  const baseState = saved ? fromSaved(saved) : carryOver ? fromCarry(carryOver) : initialState;
   /**
    * 임시 저장본을 어떻게 다룰지 (DESIGN §1-2)
    * - 낸 보고가 없음 → 바로 불러온다
@@ -488,6 +517,15 @@ function ReportFormInner({
       {saved !== null && pendingDraft === null && restoredAt === null && submitStatus.kind !== "done" && (
         <p role="status" className="rounded-md border border-zinc-300 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-700 dark:bg-zinc-900">
           이번 주에 제출한 보고를 불러왔습니다. 고쳐서 다시 제출하면 기존 보고를 덮어씁니다.
+        </p>
+      )}
+
+      {/* 지난주 보고의 "다음 주 예정 작업"을 이번 주 작업 내용으로 불러온 경우 (저장·제출은 아직 안 된 상태) */}
+      {saved === null && carryOver !== null && restoredAt === null && submitStatus.kind !== "done" && (
+        <p role="status" className="rounded-md border border-blue-300 bg-blue-50 px-4 py-3 text-sm text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
+          지난주({carryOver.fromLabel}) 보고에 적은 다음 주 예정 작업 {carryOver.tasks.length}건을 이번 주 작업 내용으로
+          불러왔습니다. 아직 제출되지 않았으니 내용과 금액을 확인한 뒤 제출해 주세요.
+          {carryOver.tasks.some((t) => t.amount === "") && " 금액이 '미정'이던 작업은 금액을 채워야 제출할 수 있습니다."}
         </p>
       )}
 

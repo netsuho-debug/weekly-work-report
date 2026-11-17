@@ -4,7 +4,7 @@
 // 실행:   node --env-file=.env scripts/seed-codes.mjs
 // 다시 만들기(기존 코드를 모두 새 코드로 바꿈): node --env-file=.env scripts/seed-codes.mjs --force
 //
-// - 코드는 암호학적 난수 12자. DB 에는 해시값만 저장하고, 코드 원문은 `.env.codes.local` 에만 적는다.
+// - 코드는 암호학적 난수 숫자 6자리. DB 에는 해시값만 저장하고, 코드 원문은 `.env.codes.local` 에만 적는다.
 //   (이 파일은 .gitignore 의 `.env*` 규칙에 걸려 커밋되지 않는다.)
 // - 화면(터미널)에는 코드를 출력하지 않는다. 코드는 .env.codes.local 파일을 열어서 확인한다.
 // - --force 로 바꾸면 version 이 +1 되어, 이미 발급된 쿠키(입장 상태)가 모두 무효가 된다.
@@ -59,15 +59,26 @@ for (const slot of slots) {
   issued.push({ ...slot, code, hash });
 }
 
-// 저장: 이미 있는 칸은 해시를 바꾸고 version +1, 없는 칸은 새로 넣는다
-for (const item of issued) {
-  const prev = existing.find((e) => e.role === item.role && (e.office_id ?? null) === item.office_id);
-  const result = prev
-    ? await db.from("access_codes").update({ code_hash: item.hash, version: prev.version + 1 }).eq("id", prev.id)
-    : await db.from("access_codes").insert({ role: item.role, office_id: item.office_id, code_hash: item.hash, version: 1 });
-  if (result.error) {
-    console.error(`${item.label} 코드 저장 실패:`, result.error.code);
+// 저장: 이미 14칸이 다 있으면 DB 함수 change_codes 로 "한 번에" 바꾼다 (하나라도 실패하면 전부 되돌려져서,
+// 일부만 바뀐 채 새 코드 원문이 사라지는 일이 없다). 칸이 없으면 새로 넣는다.
+const allExist = slots.every((s) => existing.some((e) => e.role === s.role && (e.office_id ?? null) === s.office_id));
+if (allExist) {
+  const changes = issued.map((i) => ({ role: i.role, office_id: i.office_id, code_hash: i.hash }));
+  const { error } = await db.rpc("change_codes", { p_changes: changes });
+  if (error) {
+    console.error("코드 저장 실패 (아무것도 바뀌지 않았습니다):", error.code);
     process.exit(1);
+  }
+} else {
+  for (const item of issued) {
+    const prev = existing.find((e) => e.role === item.role && (e.office_id ?? null) === item.office_id);
+    const result = prev
+      ? await db.from("access_codes").update({ code_hash: item.hash, version: prev.version + 1 }).eq("id", prev.id)
+      : await db.from("access_codes").insert({ role: item.role, office_id: item.office_id, code_hash: item.hash, version: 1 });
+    if (result.error) {
+      console.error(`${item.label} 코드 저장 실패:`, result.error.code);
+      process.exit(1);
+    }
   }
 }
 

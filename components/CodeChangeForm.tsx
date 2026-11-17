@@ -201,7 +201,7 @@ export default function CodeChangeForm() {
                     onChange={(e) => updateRow(slot, { code: e.target.value })}
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? `code-error-${key}` : undefined}
-                    placeholder="대·소문자·숫자 섞어 12자 이상"
+                    placeholder="숫자 6자리"
                     className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-sm text-zinc-900 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                   />
                 </div>

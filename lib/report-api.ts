@@ -42,7 +42,7 @@ export type SavedReport = {
 export type SubmitResponse =
   | {
       ok: true;
-      /** 마감(목 11:00 KST) 이후에 낸 제출인지 */
+      /** 마감(화 15:00 KST) 이후에 낸 제출인지 */
       isLate: boolean;
       /** 서버가 기록한 제출 시각 (ISO 문자열) */
       submittedAt: string;

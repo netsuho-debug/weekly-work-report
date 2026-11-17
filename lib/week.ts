@@ -1,5 +1,5 @@
-// Design Ref: §5 lib/week.ts, §2-1 — 주차(월~일)·마감(목 11:00)·지각 판정을 한국 시간(KST)으로 계산한다.
-// Plan SC: S5 "목요일 11:00 이후 제출·재제출은 지각 제출", 위험표 "서버(Vercel)는 UTC이므로 KST 변환 명시"
+// Design Ref: §5 lib/week.ts, §2-1 — 주차(월~일)·마감(화 15:00)·지각 판정을 한국 시간(KST)으로 계산한다.
+// Plan SC: S5 "화요일 15:00 이후 제출·재제출은 지각 제출", 위험표 "서버(Vercel)는 UTC이므로 KST 변환 명시"
 //
 // 주차는 "월요일 날짜"를 문자열("YYYY-MM-DD")로 들고 다닌다. (reports.week_start 와 같은 모양)
 // 한국은 서머타임이 없어 항상 UTC+9 이므로 고정값으로 계산한다.
@@ -8,9 +8,9 @@
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** 마감: 매주 목요일 11:00 (공휴일이어도 변경 없음 — PRD 4장. 2026-11-12 화 14:00 에서 변경) */
-export const DEADLINE_DAY_FROM_MONDAY = 3; // 월요일 + 3일 = 목요일
-export const DEADLINE_HOUR = 11;
+/** 마감: 매주 화요일 15:00 (공휴일이어도 변경 없음 — PRD 4장. 2026-11-17 목 11:00 에서 변경) */
+export const DEADLINE_DAY_FROM_MONDAY = 1; // 월요일 + 1일 = 화요일
+export const DEADLINE_HOUR = 15;
 
 const WEEK_START_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"] as const;
@@ -71,7 +71,7 @@ export function getWeekEnd(weekStart: string): string {
   return utcMsToYmd(ymdToUtcMs(weekStart) + 6 * DAY_MS);
 }
 
-/** 그 주의 제출 마감 시각 = 목요일 11:00:00 (KST). 반환값은 비교용 Date */
+/** 그 주의 제출 마감 시각 = 화요일 15:00:00 (KST). 반환값은 비교용 Date */
 export function getDeadline(weekStart: string): Date {
   const mondayUtcMs = ymdToUtcMs(weekStart);
   const deadlineKstWallMs =
@@ -80,7 +80,7 @@ export function getDeadline(weekStart: string): Date {
 }
 
 /**
- * 지각 제출인지 판정한다. 마감 시각(목 11:00:00 KST) "이상"이면 지각이다. (DESIGN §2-1, §7)
+ * 지각 제출인지 판정한다. 마감 시각(화 15:00:00 KST) "이상"이면 지각이다. (DESIGN §2-1, §7)
  * - 마감 전에 냈더라도 마감 뒤에 고쳐서 다시 제출하면 마지막 제출 시각으로 다시 판정한다.
  * - weekStart 를 안 주면 제출 시각이 속한 주를 보고 주차로 삼는다. (DESIGN §8-3)
  */
@@ -94,8 +94,11 @@ export function formatWeekRange(weekStart: string): string {
   return `${weekStart}(${DAY_NAMES[1]}) ~ ${end}(${DAY_NAMES[0]})`;
 }
 
-/** 화면 표시용 마감 문구. 예: "목 11:00" (마감 요일·시각 상수에서 만든다) */
+/** 화면 표시용 마감 문구. 예: "화 15:00" (마감 요일·시각 상수에서 만든다) */
 export const DEADLINE_LABEL = `${DAY_NAMES[(1 + DEADLINE_DAY_FROM_MONDAY) % 7]} ${pad2(DEADLINE_HOUR)}:00`;
+
+/** 화면 표시용 마감 문구 (요일을 풀어 씀). 예: "화요일 15:00" */
+export const DEADLINE_LABEL_LONG = `${DAY_NAMES[(1 + DEADLINE_DAY_FROM_MONDAY) % 7]}요일 ${pad2(DEADLINE_HOUR)}:00`;
 
 /**
  * 주소의 `?week=` 값을 현황판에서 쓸 주차(월요일 날짜)로 정리한다. (작업 11 지난 주차 조회)
@@ -108,9 +111,11 @@ export function resolveWeekParam(
   now: Date = new Date(),
 ): string {
   const current = getWeekStart(now);
+  // 다음 주까지는 볼 수 있다 (현황 화면의 "다음 주 ▶" 버튼). 그보다 먼 미래는 이번 주로 돌린다
+  const latest = addWeeks(current, 1);
   const value = Array.isArray(param) ? param[0] : param;
   // "YYYY-MM-DD" 는 글자 순서가 곧 날짜 순서라서 문자열 비교로 충분하다
-  return isValidWeekStart(value) && value <= current ? value : current;
+  return isValidWeekStart(value) && value <= latest ? value : current;
 }
 
 /** 최근 주차 목록 (월요일 날짜, 최신이 맨 앞). 예: recentWeekStarts("2026-11-09", 3) → [11-09, 11-02, 10-26] */

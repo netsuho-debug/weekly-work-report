@@ -29,7 +29,7 @@ async function CodesScreen() {
       <header className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <Link href="/dashboard" className="text-sm text-brand hover:underline dark:text-sky-300">
-            ← 주간 업무 보고 현황으로
+            ← 사업장별 주간 작업 현황으로
           </Link>
           <h1 className="text-2xl font-bold">접속 코드 변경</h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -42,7 +42,7 @@ async function CodesScreen() {
       <ul className="list-disc space-y-1 rounded-md border border-amber-300 bg-amber-50 px-8 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
         <li>저장하면 <strong>옛 코드는 즉시 쓸 수 없게</strong> 되고, 그 코드로 들어와 있던 사람도 다시 입장해야 합니다.</li>
         <li>새 코드는 <strong>저장 직후 한 번만</strong> 보여 줍니다. 화면을 닫기 전에 받아 적어 해당 청사에 전달하세요.</li>
-        <li>직접 정하는 코드는 영문 대문자·소문자·숫자를 모두 섞어 12자 이상이어야 하며, 다른 줄과 같은 코드는 쓸 수 없습니다.</li>
+        <li>직접 정하는 코드는 숫자 6자리여야 하며, 다른 줄과 같은 코드는 쓸 수 없습니다.</li>
       </ul>
 
       <CodeChangeForm />

@@ -7,7 +7,7 @@
 import { fetchStatusRows } from "@/lib/dashboard";
 import { buildWeeklyWorkbook } from "@/lib/excel";
 import { isDeptSession } from "@/lib/session";
-import { resolveWeekParam } from "@/lib/week";
+import { getWeekStart, resolveWeekParam } from "@/lib/week";
 
 const XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
@@ -19,7 +19,11 @@ export async function GET(request: Request) {
     );
   }
 
-  const weekStart = resolveWeekParam(new URL(request.url).searchParams.getAll("week"));
+  // 다음 주는 아직 보고가 없으므로, 현황판과 같이 그 예정 작업이 담긴 이번 주 보고를 내려 준다
+  const now = new Date();
+  const picked = resolveWeekParam(new URL(request.url).searchParams.getAll("week"), now);
+  const currentWeekStart = getWeekStart(now);
+  const weekStart = picked > currentWeekStart ? currentWeekStart : picked;
 
   let file: Buffer;
   try {

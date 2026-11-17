@@ -16,10 +16,12 @@ const STYLE: Record<SubmissionStatus, string> = {
     "bg-orange-100 text-orange-800 ring-orange-600/30 dark:bg-orange-950 dark:text-orange-300 dark:ring-orange-500/40",
 };
 
-export default function StatusBadge({ status }: { status: SubmissionStatus }) {
+/** size: "lg" 는 현황 화면 카드처럼 크게 보여 줄 때 */
+export default function StatusBadge({ status, size = "sm" }: { status: SubmissionStatus; size?: "sm" | "lg" }) {
+  const sizeClass = size === "lg" ? "px-3 py-1 text-sm" : "px-2.5 py-0.5 text-xs";
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${STYLE[status]}`}
+      className={`inline-flex items-center rounded-full font-semibold ring-1 ring-inset ${sizeClass} ${STYLE[status]}`}
     >
       {STATUS_LABEL[status]}
     </span>

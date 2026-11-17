@@ -11,8 +11,8 @@ import { createHmac, randomInt } from "node:crypto";
 // 코드 규칙(길이·글자 종류)은 브라우저에서도 쓰므로 code-rules.ts 에 있다.
 // (이 파일은 Node 가 직접 실행하는 스크립트(scripts/seed-codes.mjs)도 불러 쓰기 때문에, 확장자 없는 상대 경로 import 를 쓰지 않는다)
 
-/** 자동 생성에 쓰는 글자: 영문 대소문자+숫자. 읽을 때 헷갈리는 글자(0 O 1 l I)는 뺐다 */
-const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+/** 자동 생성에 쓰는 글자: 숫자 0~9 (접속 코드는 숫자 6자리) */
+const ALPHABET = "0123456789";
 
 function getPepper(): string {
   const pepper = process.env.CODE_PEPPER;
@@ -30,9 +30,9 @@ export function hashCode(code: string): string {
 
 /**
  * 암호학적 난수로 접속 코드를 만든다 (치우침 없이 글자를 고른다).
- * length 기본값 12 는 code-rules.ts 의 GENERATED_CODE_LENGTH 와 같다.
+ * length 기본값 6 은 code-rules.ts 의 GENERATED_CODE_LENGTH 와 같다.
  */
-export function generateCode(length: number = 12): string {
+export function generateCode(length: number = 6): string {
   let out = "";
   for (let i = 0; i < length; i++) out += ALPHABET[randomInt(ALPHABET.length)];
   return out;

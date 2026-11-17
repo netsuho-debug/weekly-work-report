@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import LogoutButton from "@/components/LogoutButton";
-import ReportForm from "@/components/ReportForm";
+import ReportForm, { type CarryOver } from "@/components/ReportForm";
 import StatusBadge from "@/components/StatusBadge";
 import { formatAmountInput } from "@/lib/amount";
 import { fetchOfficeStatus } from "@/lib/dashboard";
@@ -19,7 +19,15 @@ import { getOfficeById } from "@/lib/offices";
 import type { SavedReport } from "@/lib/report-api";
 import { getSessionOfficeId } from "@/lib/session";
 import type { OfficeStatusRow, TaskView } from "@/lib/status";
-import { DEADLINE_LABEL, formatWeekRange, getNextWeekStart, getWeekStart, isLate } from "@/lib/week";
+import {
+  addWeeks,
+  DEADLINE_LABEL,
+  DEADLINE_LABEL_LONG,
+  formatWeekRange,
+  getNextWeekStart,
+  getWeekEnd,
+  getWeekStart,
+} from "@/lib/week";
 
 export const metadata: Metadata = {
   title: "주간 보고 입력 | 사업장별 주간 공사·작업 현황",
@@ -62,8 +70,6 @@ async function ReportScreen() {
   const now = new Date();
   const thisWeek = getWeekStart(now);
   const nextWeek = getNextWeekStart(thisWeek);
-  // 이미 마감(목 11:00)이 지났으면 미리 알려 준다. 제출이나 재제출은 막지 않고 "지각 제출"로 표시한다.
-  const pastDeadline = isLate(now, thisWeek);
 
   // 이미 낸 이번 주 보고를 읽는다. 읽지 못하면 빈 폼으로 열되, 덮어쓰기 위험을 알린다
   let status: OfficeStatusRow | null = null;
@@ -74,13 +80,31 @@ async function ReportScreen() {
   }
   const saved = status ? toSavedReport(status) : null;
 
+  // 이번 주 보고를 아직 내지 않았으면, 지난주 보고에 적은 "다음 주 예정 작업"을 이번 주 작업 내용으로 불러온다.
+  // (불러오기만 한다. 사업장이 확인하고 [제출하기]를 눌러야 저장된다. 읽지 못하면 그냥 빈 화면으로 연다)
+  let carryOver: CarryOver | null = null;
+  if (status && saved === null) {
+    const lastWeek = addWeeks(thisWeek, -1);
+    try {
+      const prev = await fetchOfficeStatus(office.id, lastWeek);
+      if (prev.submittedAt !== null && !prev.nextNone && prev.nextTasks.length > 0) {
+        carryOver = {
+          fromLabel: `${lastWeek.slice(5)} ~ ${getWeekEnd(lastWeek).slice(5)}`,
+          tasks: prev.nextTasks.map(toInput),
+        };
+      }
+    } catch {
+      carryOver = null; // 원인은 서버 로그에 남았다
+    }
+  }
+
   return (
     <main className="mx-auto w-full max-w-2xl space-y-6 px-4 py-8">
       <header className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">{office.name} 주간 보고</h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {formatWeekRange(thisWeek)} 주 · 제출 마감 매주 {DEADLINE_LABEL}
+            제출 기한 매주 {DEADLINE_LABEL_LONG}
           </p>
           {/* 현재 상태 (DESIGN §1-2 "상단에 현재 상태(제출/지각 제출)를 표시") */}
           {status && (
@@ -112,16 +136,6 @@ async function ReportScreen() {
         </div>
       )}
 
-      {pastDeadline && status?.status !== "overdue" && (
-        <p
-          role="note"
-          className="rounded-md border border-orange-400 bg-orange-50 px-4 py-3 text-sm text-orange-900 dark:border-orange-700 dark:bg-orange-950 dark:text-orange-200"
-        >
-          이번 주 마감({DEADLINE_LABEL})이 지났습니다. 지금 제출하거나 고쳐서 다시 제출해도
-          &quot;제출 완료&quot;로 표시됩니다. 제출은 그대로 할 수 있습니다.
-        </p>
-      )}
-
       <p
         role="note"
         className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
@@ -141,6 +155,7 @@ async function ReportScreen() {
 
       <ReportForm
         saved={saved}
+        carryOver={carryOver}
         officeId={office.id}
         weekStart={thisWeek}
         thisWeekDescription={`${formatWeekRange(thisWeek)} 에 진행한 작업입니다.`}
