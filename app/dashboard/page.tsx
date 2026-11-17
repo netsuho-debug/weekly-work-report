@@ -121,6 +121,8 @@ async function DashboardScreen({ searchParams }: { searchParams: SearchParams })
   return (
     <PageShell width="lg">
         {/* 남색 머리띠: 제목·보조 버튼 / 주차 이동 / 핵심 숫자 3개 (공통 틀 PageBand) */}
+        {/* 머리띠는 스크롤해도 화면 위에 고정된다 (2026-11-18 요청). 뒤로 지나가는 목록이 비치지 않게 회색 바탕으로 감싼다 */}
+        <div className="sticky top-0 z-20 -mx-4 bg-zinc-100 px-4 pb-1 pt-2">
         <PageBand title="청사별 주간 작업 현황" right={<LogoutButton onDark />}>
           <div className="mt-2 -ml-2">
             <WeekPicker weekStart={weekStart} currentWeekStart={currentWeekStart} officeId={officeId} />
@@ -169,6 +171,7 @@ async function DashboardScreen({ searchParams }: { searchParams: SearchParams })
             </div>
           )}
         </PageBand>
+        </div>
 
         {rows === null ? (
           <p role="alert" className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
