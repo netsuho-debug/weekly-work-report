@@ -67,7 +67,7 @@ export default function WeekPicker({ weekStart, currentWeekStart, officeId = nul
   return (
     <nav
       aria-label="주차 이동"
-      className="grid grid-cols-3 divide-x divide-zinc-300 overflow-hidden rounded-lg border border-zinc-300 dark:divide-zinc-700 dark:border-zinc-700"
+      className="grid grid-cols-3 divide-x divide-zinc-300 overflow-hidden rounded-lg border border-zinc-300 bg-white dark:divide-zinc-700 dark:border-zinc-700"
     >
       <Link href={dashboardHref(prev, currentWeekStart, officeId, view)} className={segClass} aria-label="이전 주">
         ◀ 이전 주

@@ -6,7 +6,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function LogoutButton() {
+/** onDark: 남색 머리띠처럼 어두운 바탕 위에 놓을 때 (흰 글씨·연한 테두리) */
+export default function LogoutButton({ onDark = false }: { onDark?: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -28,7 +29,11 @@ export default function LogoutButton() {
       type="button"
       onClick={handleClick}
       disabled={busy}
-      className="shrink-0 whitespace-nowrap rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-100 disabled:opacity-60 dark:border-zinc-700 dark:hover:bg-zinc-800"
+      className={`shrink-0 whitespace-nowrap rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-60 ${
+        onDark
+          ? "border-white/40 text-white hover:bg-white/10"
+          : "border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+      }`}
     >
       나가기
     </button>

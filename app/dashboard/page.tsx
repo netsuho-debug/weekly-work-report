@@ -68,32 +68,39 @@ async function DashboardScreen({ searchParams }: { searchParams: SearchParams })
   }
 
   return (
-    // 2026-11-17 디자인 변경: 임원이 보기 편하도록 화면을 넓히고(최대 5xl), 글자를 키우고, 위쪽에 큰 숫자 카드를 두었다
-    <main className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8">
-      {/* 휴대폰에서도 줄바꿈되지 않도록: 제목 줄에만 [나가기]를 두고, 주차·마감은 아래에서 폭을 다 쓴다 */}
-      <header className="space-y-1">
+    // 2026-11-17 디자인 변경 (2차): 연한 회색 바탕 위에 흰 카드를 올려 경계를 또렷하게 하고,
+    // 맨 위에는 입장 화면과 같은 남색 머리띠를 두어 "어느 주 화면인지"가 첫눈에 들어오게 했다.
+    <div className="flex-1 bg-zinc-100">
+    <main className="mx-auto w-full max-w-5xl space-y-4 px-4 py-6 sm:space-y-5 sm:py-8">
+      {/* 남색 머리띠: 제목·주차·마감과 보조 버튼(엑셀·코드 변경·나가기)을 한곳에 모은다 */}
+      <header className="space-y-1 rounded-2xl bg-brand-dark px-4 py-4 text-white sm:px-6 sm:py-5">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl dark:text-zinc-100">사업장별 주간 작업 현황</h1>
-          <LogoutButton />
+          <h1 className="text-xl font-bold sm:text-3xl">사업장별 주간 작업 현황</h1>
+          <LogoutButton onDark />
         </div>
-        <p className="text-base font-semibold text-brand sm:text-lg dark:text-sky-300">{weekHeading(weekStart, currentWeekStart)}</p>
-        {/* 마감 안내 줄 오른쪽에 보조 버튼(엑셀·코드 변경)을 [나가기]와 같은 작은 크기로 둔다 */}
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-zinc-500">제출 마감 매주 {DEADLINE_LABEL}</p>
+        <p className="text-sm font-semibold tracking-tight text-sky-200 sm:text-lg sm:tracking-normal">{weekHeading(weekStart, currentWeekStart)}</p>
+        {/* 지난 주·다음 주는 무엇을 기준으로 보여 주는지 한 줄로 알려 준다 (예전 파란 안내 상자를 대신함) */}
+        {weekStart !== currentWeekStart && (
+          <p className="text-xs text-sky-100/90 sm:text-sm">
+            {isNextWeek ? "이번 주 보고에 적은 다음 주 예정 작업 기준입니다." : "그 주에 마지막으로 제출한 내용 기준입니다."}
+          </p>
+        )}
+        <div className="flex items-center justify-between gap-3 pt-1.5">
+          <p className="text-xs text-sky-100/90 sm:text-sm">⏱ 제출 마감 매주 {DEADLINE_LABEL}</p>
           <div className="flex shrink-0 items-center gap-1.5">
             {/* 보고 주차를 엑셀로 받는다 (다음 주 화면이면 그 예정 작업이 들어 있는 이번 주 보고).
                 파일 내려받기라서 화면 이동용 링크(Link)가 아닌 일반 링크를 쓴다 */}
             <a
               href={`/api/export?week=${sourceWeek}`}
               download
-              className="whitespace-nowrap rounded-md border border-green-700 px-3 py-1.5 text-xs font-semibold text-green-800 hover:bg-green-50 dark:border-green-600 dark:text-green-300 dark:hover:bg-green-950"
+              className="whitespace-nowrap rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-brand-dark hover:bg-sky-50"
             >
-              엑셀 내려받기
+              ⬇ 엑셀
             </a>
             {/* 접속 코드 변경 화면 (작업 14, 부서용 코드만) */}
             <Link
               href="/admin/codes"
-              className="whitespace-nowrap rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+              className="whitespace-nowrap rounded-md border border-white/40 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/10"
             >
               코드 변경
             </Link>
@@ -114,18 +121,6 @@ async function DashboardScreen({ searchParams }: { searchParams: SearchParams })
         </div>
       </div>
 
-      {/* 지금 어느 주를 보고 있는지 같은 모양의 안내로 알려 준다 (지난 주 / 이번 주 / 다음 주) */}
-      <p
-        role="note"
-        className="rounded-md border border-blue-300 bg-blue-50 px-4 py-3 text-sm text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200"
-      >
-        {weekStart < currentWeekStart
-          ? "지난 주차의 보고를 보고 있습니다. 상태와 금액은 그 주에 마지막으로 제출한 내용 기준입니다."
-          : isNextWeek
-            ? "다음 주의 예정 작업을 보고 있습니다. 내용은 이번 주 보고에 적은 다음 주 예정 작업 기준입니다."
-            : "이번 주의 보고를 보고 있습니다. 상태와 금액은 지금까지 제출한 내용 기준입니다."}
-      </p>
-
       {rows === null ? (
         <p
           role="alert"
@@ -142,6 +137,7 @@ async function DashboardScreen({ searchParams }: { searchParams: SearchParams })
         />
       )}
     </main>
+    </div>
   );
 }
 
@@ -185,14 +181,30 @@ function StatusList({
       <div role="status" className="grid grid-cols-2 gap-2 sm:gap-3">
         <div
           role={isOverdue ? "alert" : undefined}
-          className={`min-w-0 rounded-xl border px-2.5 py-3 sm:px-5 sm:py-4 ${
-            isOverdue
-              ? "border-orange-300 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/50"
-              : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+          className={`min-w-0 rounded-xl border px-2.5 py-3 shadow-sm sm:px-5 sm:py-4 ${
+            isOverdue ? "border-orange-300 bg-orange-50" : "border-zinc-200 bg-white"
           }`}
         >
-          <p className={CARD_LABEL}>제출 현황</p>
+          <CardLabel icon="✓" tone={isOverdue ? "orange" : "green"}>
+            제출 현황
+          </CardLabel>
           <CardValue items={[{ value: String(submittedCount), unit: "곳" }, { value: String(OFFICE_COUNT), unit: "곳" }]} />
+          {/* 진행 막대: 숫자를 읽지 않아도 얼마나 냈는지 보이게 한다 (다 내면 초록, 기한 지나 안 낸 곳이 있으면 주황) */}
+          <div
+            className="mt-2 h-1.5 overflow-hidden rounded-full bg-zinc-200"
+            role="progressbar"
+            aria-label="제출 진행"
+            aria-valuemin={0}
+            aria-valuemax={OFFICE_COUNT}
+            aria-valuenow={submittedCount}
+          >
+            <div
+              className={`h-full rounded-full ${
+                pendingRows.length === 0 ? "bg-green-600" : isOverdue ? "bg-orange-500" : "bg-brand"
+              }`}
+              style={{ width: `${Math.round((submittedCount / OFFICE_COUNT) * 100)}%` }}
+            />
+          </div>
           {pendingRows.length === 0 ? (
             <p className={`${CARD_NOTE} font-medium text-green-700 dark:text-green-400`}>모든 사업장이 제출했습니다</p>
           ) : (
@@ -247,31 +259,51 @@ function StatusList({
 }
 
 // 요약 카드 두 장이 같은 비율로 보이도록 글자 단계를 셋으로 맞춘다 (2026-11-17)
-//   제목(작은 회색) → 숫자(크고 진한 검정, 단위는 작은 회색) → 설명(작은 회색, 상태일 때만 초록/주황)
-const CARD_LABEL = "text-xs font-medium text-zinc-500 sm:text-sm dark:text-zinc-400";
-const CARD_NOTE = "mt-1 text-xs leading-snug sm:mt-1.5 sm:text-sm";
+//   제목(작은 회색 + 색 아이콘) → 숫자(크고 진하게, 단위는 작은 회색, 금액은 남색) → 설명(작은 회색, 상태일 때만 초록/주황)
+const CARD_NOTE = "mt-1.5 text-xs leading-snug sm:text-sm";
 
-/** 숫자(크게) + 단위(작게) 한 묶음 */
-function NumUnit({ value, unit }: { value: string; unit?: string }) {
+const ICON_TONE = {
+  green: "bg-green-100 text-green-700",
+  orange: "bg-orange-100 text-orange-700",
+  brand: "bg-sky-100 text-brand",
+} as const;
+
+/** 카드 제목: 작은 색 아이콘 + 회색 글씨 */
+function CardLabel({ icon, tone, children }: { icon: string; tone: keyof typeof ICON_TONE; children: React.ReactNode }) {
+  return (
+    <p className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 sm:text-sm">
+      <span
+        aria-hidden="true"
+        className={`inline-flex h-5 w-5 items-center justify-center rounded-md text-[11px] font-bold ${ICON_TONE[tone]}`}
+      >
+        {icon}
+      </span>
+      {children}
+    </p>
+  );
+}
+
+/** 숫자(크게) + 단위(작게) 한 묶음. accent 면 숫자를 남색으로 (금액) */
+function NumUnit({ value, unit, accent = false }: { value: string; unit?: string; accent?: boolean }) {
   return (
     <span className="whitespace-nowrap">
       {/* 휴대폰 반쪽 칸에도 "16건 / 75,406,500원"이 한 줄로 들어가도록 단계적으로 키운다 */}
-      <span className="text-base font-bold tracking-tight text-zinc-900 sm:text-2xl lg:text-3xl dark:text-zinc-50">
+      <span className={`text-base font-bold tracking-tight sm:text-2xl lg:text-3xl ${accent ? "text-brand" : "text-zinc-900"}`}>
         {value}
       </span>
-      {unit && <span className="ml-0.5 text-xs font-medium text-zinc-500 sm:text-sm dark:text-zinc-400">{unit}</span>}
+      {unit && <span className="ml-0.5 text-xs font-medium text-zinc-500 sm:text-sm">{unit}</span>}
     </span>
   );
 }
 
 /** 카드의 큰 숫자 줄. 여러 값은 " / "로 잇는다 (예: 13 / 13곳, 16건 / 75,406,500원) */
-function CardValue({ items }: { items: { value: string; unit?: string }[] }) {
+function CardValue({ items }: { items: { value: string; unit?: string; accent?: boolean }[] }) {
   return (
-    <p className="mt-1 flex flex-wrap items-baseline gap-x-1.5 tabular-nums">
+    <p className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 tabular-nums">
       {items.map((item, i) => (
         <span key={i} className="flex items-baseline gap-x-1.5">
           {i > 0 && <span className="text-xs text-zinc-400 sm:text-base">/</span>}
-          <NumUnit value={item.value} unit={item.unit} />
+          <NumUnit value={item.value} unit={item.unit} accent={item.accent} />
         </span>
       ))}
     </p>
@@ -283,15 +315,17 @@ function SummaryCard({ label, amount, count, note }: { label: string; amount: st
   // "75,406,500원" → 숫자는 크게, "원"은 단위로 작게. "미정"은 단위 없이 그대로
   const hasWon = amount.endsWith("원");
   return (
-    <div className="min-w-0 rounded-xl border border-zinc-200 bg-white px-2.5 py-3 sm:px-5 sm:py-4 dark:border-zinc-800 dark:bg-zinc-950">
-      <p className={CARD_LABEL}>{label}</p>
+    <div className="min-w-0 rounded-xl border border-zinc-200 bg-white px-2.5 py-3 shadow-sm sm:px-5 sm:py-4">
+      <CardLabel icon="₩" tone="brand">
+        {label}
+      </CardLabel>
       <CardValue
         items={[
           { value: String(count), unit: "건" },
-          { value: hasWon ? amount.slice(0, -1) : amount, unit: hasWon ? "원" : undefined },
+          { value: hasWon ? amount.slice(0, -1) : amount, unit: hasWon ? "원" : undefined, accent: true },
         ]}
       />
-      {note && <p className={`${CARD_NOTE} text-zinc-600 dark:text-zinc-400`}>{note}</p>}
+      {note && <p className={`${CARD_NOTE} text-zinc-600`}>{note}</p>}
     </div>
   );
 }
