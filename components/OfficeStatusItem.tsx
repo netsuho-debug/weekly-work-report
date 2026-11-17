@@ -11,14 +11,6 @@ import StatusBadge from "./StatusBadge";
 import { formatWon } from "@/lib/amount";
 import type { OfficeStatusRow, SubmissionStatus, TaskView } from "@/lib/status";
 
-const submittedAtFormat = new Intl.DateTimeFormat("ko-KR", {
-  timeZone: "Asia/Seoul",
-  month: "numeric",
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-});
-
 /** 카드 왼쪽 상태 색 띠 */
 const STRIPE: Record<SubmissionStatus, string> = {
   submitted: "border-l-green-500",
@@ -115,16 +107,12 @@ export default function OfficeStatusItem({
   const nextSum = row.nextTasks.reduce((sum, t) => sum + (t.amount ?? 0), 0);
   const nextAllUndecided = row.nextTasks.length > 0 && nextUndecided === row.nextTasks.length;
 
-  // 카드 머리줄: 사업장 이름·상태·제출 시각만 둔다. 합계는 아래 구역 머리에 한 번만 보여 준다(중복 방지)
+  // 카드 머리줄: 왼쪽에 사업장 이름, 오른쪽 끝에 상태 배지만 둔다 (제출 시각은 보여 주지 않는다 — 2026-11-17 요청).
+  // 합계는 아래 구역 머리에 한 번만 보여 준다(중복 방지)
   const header = (
-    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-      <div className="flex items-center gap-2.5">
-        <span className="text-lg font-bold text-zinc-900">{row.officeName}</span>
-        <StatusBadge status={row.status} />
-      </div>
-      <span className="text-xs text-zinc-400">
-        {row.submittedAt ? `${submittedAtFormat.format(new Date(row.submittedAt))} 제출` : "아직 제출 전"}
-      </span>
+    <div className="flex items-center justify-between gap-3">
+      <span className="min-w-0 text-lg font-bold text-zinc-900">{row.officeName}</span>
+      <StatusBadge status={row.status} />
     </div>
   );
 
