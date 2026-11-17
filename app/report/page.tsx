@@ -30,7 +30,7 @@ import {
 } from "@/lib/week";
 
 export const metadata: Metadata = {
-  title: "주간 보고 입력 | 사업장별 주간 공사·작업 현황",
+  title: "주간 보고 입력 | 청사별 주간 공사·작업 현황",
 };
 
 /** 저장된 작업 → 입력 칸 모양 (금액은 "1,500,000", 미정이면 빈칸) */

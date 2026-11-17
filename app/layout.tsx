@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "사업장별 주간 공사·작업 현황",
+  title: "청사별 주간 공사·작업 현황",
   description: "중부개발처 자산관리팀이 담당하는 사업장 13곳의 주간 작업 보고를 한곳에서 받고 취합합니다.",
   // 내부 업무용 화면이라 검색엔진에 노출하지 않는다
   robots: { index: false, follow: false },

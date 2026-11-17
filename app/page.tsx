@@ -16,7 +16,7 @@ import { readSession } from "@/lib/session";
 function EntryShell() {
   return (
     <PageShell width="sm">
-      <PageBand title="사업장별 주간 공사·작업 현황">
+      <PageBand title="청사별 주간 공사·작업 현황">
         <ul className="mt-3 space-y-1 text-sm text-sky-100">
           <li>
             <strong className="font-semibold text-white">사업장 코드</strong> → 우리 사업장 보고 작성

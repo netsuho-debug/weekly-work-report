@@ -17,7 +17,7 @@ import { PageBand, PageShell, PANEL } from "@/components/PageShell";
 import { isDeptSession } from "@/lib/session";
 
 export const metadata: Metadata = {
-  title: "접속 코드 변경 | 사업장별 주간 공사·작업 현황",
+  title: "접속 코드 변경 | 청사별 주간 공사·작업 현황",
 };
 
 async function CodesScreen() {
@@ -30,7 +30,7 @@ async function CodesScreen() {
     <PageShell>
       <PageBand title="접속 코드 변경" right={<LogoutButton onDark />}>
         <Link href="/dashboard" className="mt-1.5 inline-block text-sm text-sky-200 hover:text-white">
-          ← 사업장별 주간 작업 현황으로
+          ← 청사별 주간 작업 현황으로
         </Link>
       </PageBand>
 

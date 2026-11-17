@@ -32,7 +32,7 @@ import type { OfficeStatusRow } from "@/lib/status";
 import { DEADLINE_LABEL, getWeekStart, resolveWeekParam } from "@/lib/week";
 
 export const metadata: Metadata = {
-  title: "사업장별 주간 작업 현황 | 사업장별 주간 공사·작업 현황",
+  title: "청사별 주간 작업 현황 | 청사별 주간 공사·작업 현황",
 };
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -121,7 +121,7 @@ async function DashboardScreen({ searchParams }: { searchParams: SearchParams })
   return (
     <PageShell width="lg">
         {/* 남색 머리띠: 제목·보조 버튼 / 주차 이동 / 핵심 숫자 3개 (공통 틀 PageBand) */}
-        <PageBand title="사업장별 주간 작업 현황" right={<LogoutButton onDark />}>
+        <PageBand title="청사별 주간 작업 현황" right={<LogoutButton onDark />}>
           <div className="mt-2 -ml-2">
             <WeekPicker weekStart={weekStart} currentWeekStart={currentWeekStart} officeId={officeId} />
           </div>
