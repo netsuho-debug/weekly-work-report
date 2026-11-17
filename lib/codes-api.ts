@@ -7,7 +7,7 @@ import { OFFICES } from "./offices";
 /** 코드가 필요한 14곳: 부서용 + 청사 1~13 */
 export type CodeSlot = "dept" | number;
 
-/** 화면·응답에 보이는 이름 ("부서용", "광주남구청" ...) */
+/** 화면·응답에 보이는 이름 ("부서용", "광주남구청사" ...) */
 export function slotLabel(slot: CodeSlot): string {
   return slot === "dept" ? "부서용" : (OFFICES.find((o) => o.id === slot)?.name ?? `${slot}번`);
 }
