@@ -50,7 +50,16 @@ function TaskLine({ task, showAmount }: { task: TaskView; showAmount: boolean })
 }
 
 /** 목록 한 줄 */
-export default function OfficeStatusItem({ row, view }: { row: OfficeStatusRow; view: "this" | "next" }) {
+export default function OfficeStatusItem({
+  row,
+  view,
+  plan,
+}: {
+  row: OfficeStatusRow;
+  view: "this" | "next";
+  /** 이번 주 보고 전인 청사에 참고로 보여 줄, 지난주에 적은 다음 주 예정 작업 */
+  plan?: TaskView[];
+}) {
   const pending = row.status === "missing" || row.status === "overdue";
   const { tasks, none, total, undecided, allUndecided } = rowTasks(row, view);
 
@@ -78,6 +87,17 @@ export default function OfficeStatusItem({ row, view }: { row: OfficeStatusRow; 
       {/* 다음 주 예정 작업 중 일부만 금액 미정이면, 정해진 금액만 더했다고 알려 준다 */}
       {!pending && !none && undecided > 0 && !allUndecided && (
         <p className="text-right text-xs text-zinc-400">금액 미정 {undecided}건 제외</p>
+      )}
+      {/* 이번 주 보고 전: 지난주 보고에 적은 예정 작업을 참고용으로 보여 준다 (합계·엑셀에는 넣지 않음) */}
+      {pending && plan && plan.length > 0 && (
+        <div className="mt-1.5">
+          <p className="text-xs text-zinc-400">이번 주 작업 (지난주 예정, 아직 보고 전)</p>
+          <ul className="space-y-0.5">
+            {plan.map((t, i) => (
+              <TaskLine key={i} task={t} showAmount />
+            ))}
+          </ul>
+        </div>
       )}
       {!pending && !none && (
         <ul className="mt-1.5 space-y-0.5">

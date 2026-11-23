@@ -28,8 +28,8 @@ import { formatManwon, formatWon } from "@/lib/amount";
 import { fetchStatusRows } from "@/lib/dashboard";
 import { getOfficeById, OFFICE_COUNT } from "@/lib/offices";
 import { isDeptSession } from "@/lib/session";
-import type { OfficeStatusRow } from "@/lib/status";
-import { DEADLINE_LABEL, getWeekStart, resolveWeekParam } from "@/lib/week";
+import type { OfficeStatusRow, TaskView } from "@/lib/status";
+import { addWeeks, DEADLINE_LABEL, getWeekStart, resolveWeekParam } from "@/lib/week";
 
 export const metadata: Metadata = {
   title: "청사별 주간 작업 현황 | 청사별 주간 공사·작업 현황",
@@ -107,6 +107,19 @@ async function DashboardScreen({ searchParams }: { searchParams: SearchParams })
     rows = null; // 원인은 서버 로그에 남았다. 화면에는 쉬운 말로만 알린다
   }
 
+  // 이번 주 화면에서 아직 이번 주 보고를 안 낸 청사는 비어 보이므로, 지난주 보고에 적은 "다음 주 예정 작업"을 참고용으로 보여 준다.
+  // (합계·핵심 숫자·엑셀에는 넣지 않는다. 읽지 못하면 그냥 비워 둔다)
+  const plans = new Map<number, TaskView[]>();
+  if (rows !== null && view === "this" && weekStart === currentWeekStart) {
+    try {
+      for (const prev of await fetchStatusRows(addWeeks(weekStart, -1))) {
+        if (prev.submittedAt !== null && !prev.nextNone && prev.nextTasks.length > 0) plans.set(prev.officeId, prev.nextTasks);
+      }
+    } catch {
+      plans.clear(); // 원인은 서버 로그에 남았다
+    }
+  }
+
   // 핵심 숫자 3개 (항상 13곳 기준)
   const all = rows ?? [];
   const submittedCount = all.filter((r) => !isPending(r)).length; // 마감 뒤에 낸 보고도 제출로 센다
@@ -175,7 +188,7 @@ async function DashboardScreen({ searchParams }: { searchParams: SearchParams })
             현황을 불러오지 못했습니다. 잠시 후 화면을 새로고침해 주세요.
           </p>
         ) : (
-          <SiteList rows={rows} officeId={officeId} view={view} weekStart={weekStart} currentWeekStart={currentWeekStart} />
+          <SiteList rows={rows} officeId={officeId} view={view} weekStart={weekStart} currentWeekStart={currentWeekStart} plans={plans} />
         )}
     </PageShell>
   );
@@ -187,7 +200,10 @@ function SiteList({
   view,
   weekStart,
   currentWeekStart,
+  plans,
 }: {
+  /** 지난주에 적은 다음 주 예정 작업 (청사 번호별, 이번 주 미제출 청사에만 보여 줌) */
+  plans: Map<number, TaskView[]>;
   rows: OfficeStatusRow[];
   /** 고른 사업장 (전체면 null) */
   officeId: number | null;
@@ -224,7 +240,7 @@ function SiteList({
         </div>
         <ul className="divide-y divide-zinc-100">
           {listed.map((row) => (
-            <OfficeStatusItem key={row.officeId} row={row} view={view} />
+            <OfficeStatusItem key={row.officeId} row={row} view={view} plan={plans.get(row.officeId)} />
           ))}
         </ul>
       </section>
